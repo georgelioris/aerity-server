@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { formatUrl, timestamp } = require('../lib/helpers');
 const { openWeatherMap, darkSky } = require('../lib/fetchData');
+
 // Get weatherData
 router.get('/', (req, res) => {
   res.send('Hello World');
@@ -9,9 +10,18 @@ router.get('/', (req, res) => {
 // Get weatherData w params
 router.get('/:lat-:lon', async (req, res, next) => {
   const { lat, lon } = req.params;
-  Promise.all(openWeatherMap(lat, lon), darkSky(lat, lon))
-    .then()
-    .catch(err => next(err));
+  try {
+    const [openRes, darkRes] = await Promise.all([
+      openWeatherMap(lat, lon),
+      darkSky(lat, lon)
+    ]);
+    res.send({ ...darkRes.data, timezone: openRes.data.name });
+    // {time} Resonse sent to {user} {userID}
+    console.log(timestamp(req));
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
   // try {
   //   const response = await axios.get(url);
   //   res.send(response.data);
