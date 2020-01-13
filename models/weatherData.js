@@ -17,7 +17,7 @@ const weatherDataSchema = new Schema({
     type: String,
     required: true
   },
-  dataDate: {
+  ts: {
     type: Number,
     requred: true,
     default: Date.now()

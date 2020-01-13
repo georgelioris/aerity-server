@@ -19,15 +19,18 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
         darkSky(lat, lon)
       ]);
       // Send Response
-      const response = { ...darkRes.data, timezone: openRes.data.name };
+      const response = JSON.stringify({
+        ...darkRes.data,
+        timezone: openRes.data.name
+      });
       res.send(response);
       // Save Response
       const weatherData = new WeatherData({
         _id: cuid(),
         locationId: `${lat},${lon}`,
-        data: JSON.stringify(response),
+        data: response,
         clientID: req.query.APPID,
-        dataDate: Number(Date.now()),
+        ts: Number(Date.now()),
         expired: false
       });
       weatherData.save();
@@ -47,18 +50,18 @@ async function getWeatherData(req, res, next) {
   const id = `${req.params.lat},${req.params.lon}`;
   let weatherData;
   try {
-    const dataFound = await WeatherData.findOne({
+    const result = await WeatherData.findOne({
       locationId: id,
       expired: false
     });
     weatherData =
-      dataFound && isExpired(dataFound.dataDate)
+      weatherData && isExpired(result.ts)
         ? await WeatherData.findOneAndUpdate(
             { locationId: id, expired: false },
             { expired: true },
             { new: true }
           )
-        : dataFound;
+        : result;
   } catch (err) {
     return res.json({ message: err.message });
   }
@@ -73,9 +76,10 @@ async function getWeatherData(req, res, next) {
 
 router.delete('/delete', async (req, res) => {
   try {
-    const del = await WeatherData.deleteMany({ expired: false });
+    // Delete all entries
+    const del = await WeatherData.deleteMany({ _id: { $exists: true } });
     console.log(del);
-    res.status(201).send('done');
+    res.status(201).send(del);
   } catch (err) {
     res.status(500).json({ messagne: err.messagne });
   }
