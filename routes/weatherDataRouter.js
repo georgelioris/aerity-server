@@ -5,10 +5,6 @@ const { openWeatherMap, darkSky } = require('../lib/fetchData');
 const WeatherData = require('../models/weatherData');
 const cuid = require('cuid');
 
-// Get weatherData
-router.get('/', (req, res) => {
-  res.send('Hello World');
-});
 // Get weatherData w params
 router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
   const { lat, lon } = req.params;
@@ -46,6 +42,8 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
   }
 });
 
+// Search for stored data of requested location
+// Update and return the result acording to isExpired
 async function getWeatherData(req, res, next) {
   const id = `${req.params.lat},${req.params.lon}`;
   let weatherData;
@@ -70,13 +68,9 @@ async function getWeatherData(req, res, next) {
   next();
 }
 
-// router.post('/', (req, res) => {});
-
-// router.patch('/', (req, res) => {});
-
+// Delete all entries
 router.delete('/delete', async (req, res) => {
   try {
-    // Delete all entries
     const del = await WeatherData.deleteMany({ _id: { $exists: true } });
     console.log(del);
     res.status(201).send(del);
