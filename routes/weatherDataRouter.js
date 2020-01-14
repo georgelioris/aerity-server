@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { timestamp, isExpired } = require('../lib/helpers');
+const { timestamp, isExpired, getId } = require('../lib/helpers');
 const { openWeatherMap, darkSky } = require('../lib/fetchData');
-const WeatherData = require('../models/weatherData');
-const cuid = require('cuid');
+const firebase = require('firebase');
+const database = firebase.database();
 
 // Get weatherData w params
 router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
   const { lat, lon } = req.params;
-  if (!res.weatherData || res.weatherData.expired) {
+  const id = getId(`${req.params.lat},${req.params.lon}`);
+  if (!res.weatherData || isExpired(res.weatherData.ts)) {
     try {
       const [openRes, darkRes] = await Promise.all([
         openWeatherMap(lat, lon),
@@ -21,15 +22,13 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
       });
       res.send(response);
       // Save Response
-      const weatherData = new WeatherData({
-        _id: cuid(),
-        locationId: `${lat},${lon}`,
-        data: response,
+      database.ref(`requests/${id}`).set({
+        locationId: id,
+        loctation: openRes.data.name,
         clientId: req.query.APPID,
-        ts: Number(Date.now()),
-        expired: false
+        data: response,
+        ts: Number(Date.now())
       });
-      weatherData.save();
       // {time} Response sent to {user} {userID}
       console.log(timestamp(req));
     } catch (err) {
@@ -38,44 +37,23 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
     }
   } else {
     res.send(res.weatherData.data);
-    console.log('Cached: ' + timestamp(req));
+
+    console.log('Cached ' + timestamp(req));
   }
 });
 
 // Search for stored data of requested location
 // Update and return the result according to isExpired
 async function getWeatherData(req, res, next) {
-  const id = `${req.params.lat},${req.params.lon}`;
+  const id = getId(`${req.params.lat},${req.params.lon}`);
   let weatherData;
   try {
-    const result = await WeatherData.findOne({
-      locationId: id,
-      expired: false
-    });
-    weatherData =
-      result && isExpired(result.ts)
-        ? await WeatherData.findOneAndUpdate(
-            { locationId: id, expired: false },
-            { expired: true },
-            { new: true }
-          )
-        : result;
+    const snapshot = await database.ref(`requests/${id}`).once('value');
+    weatherData = snapshot.val();
   } catch (err) {
     return res.json({ message: err.message });
   }
-
   res.weatherData = weatherData;
   next();
 }
-
-// Delete all entries
-router.delete('/delete', async (req, res) => {
-  try {
-    const del = await WeatherData.deleteMany({ _id: { $exists: true } });
-    console.log(del);
-    res.status(201).send(del);
-  } catch (err) {
-    res.status(500).json({ messagne: err.messagne });
-  }
-});
 module.exports = router;
