@@ -25,7 +25,7 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
         _id: cuid(),
         locationId: `${lat},${lon}`,
         data: response,
-        clientID: req.query.APPID,
+        clientId: req.query.APPID,
         ts: Number(Date.now()),
         expired: false
       });
@@ -43,7 +43,7 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
 });
 
 // Search for stored data of requested location
-// Update and return the result acording to isExpired
+// Update and return the result according to isExpired
 async function getWeatherData(req, res, next) {
   const id = `${req.params.lat},${req.params.lon}`;
   let weatherData;
@@ -53,7 +53,7 @@ async function getWeatherData(req, res, next) {
       expired: false
     });
     weatherData =
-      weatherData && isExpired(result.ts)
+      result && isExpired(result.ts)
         ? await WeatherData.findOneAndUpdate(
             { locationId: id, expired: false },
             { expired: true },

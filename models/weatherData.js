@@ -13,7 +13,7 @@ const weatherDataSchema = new Schema({
     type: String,
     required: true
   },
-  clientID: {
+  clientId: {
     type: String,
     required: true
   },
