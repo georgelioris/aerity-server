@@ -46,8 +46,8 @@ app.use(cors());
 const weatherDataRouter = require('./routes/weatherDataRouter');
 app.use('/weather', weatherDataRouter);
 app.use('/.netlify/functions/server', weatherDataRouter);
-const server = app.listen(3456, () => {
-  console.log(`Server running on http://localhost:${server.address().port}`);
-});
+// const server = app.listen(3456, () => {
+//   console.log(`Server running on http://localhost:${server.address().port}`);
+// });
 
 module.exports.handler = serverless(app);
