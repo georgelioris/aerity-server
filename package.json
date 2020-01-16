@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon server.js",
-    "build": "netlify-lambda build express"
+    "build": "netlify-lambda -c webpack.config.js build express"
   },
   "dependencies": {
     "axios": "^0.19.0",
