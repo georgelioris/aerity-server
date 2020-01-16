@@ -32,7 +32,17 @@ app.use(compression());
 app.use(helmet());
 app.use(express.json());
 app.use(cors());
-
+// const database = firebase.database();
+// (async () => {
+//     try{
+//       const snap = await database.ref('requests').once('value');
+//       dispatch( { requests: snap.val(), type: 'SET_STATE'});
+//     }
+//     catch(error){
+//       dispatch({isError: error});
+//     }
+// }
+// )();
 const weatherDataRouter = require('./routes/weatherDataRouter');
 app.use('/weather', weatherDataRouter);
 app.use('/.netlify/functions/server', weatherDataRouter);
