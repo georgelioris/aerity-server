@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { timestamp, isExpired, getId } = require('../lib/helpers');
 const { openWeatherMap, darkSky } = require('../lib/fetchData');
-const firebase = require('firebase');
-const database = firebase.database();
+const admin = require('firebase-admin');
+const database = admin.database();
 
 // Get weatherData w params
 router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
@@ -25,7 +25,7 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
       database.ref(`requests/${id}`).set({
         locationId: id,
         loctation: openRes.data.name,
-        clientId: req.query.APPID,
+        clientId: req.query.APPID || null,
         data: response,
         ts: Number(Date.now())
       });
