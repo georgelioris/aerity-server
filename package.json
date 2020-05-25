@@ -17,7 +17,7 @@
     "express": "^4.17.1",
     "firebase-admin": "^8.10.0",
     "fs": "^0.0.1-security",
-    "helmet": "^3.21.3",
+    "helmet": "^3.22.0",
     "https": "^1.0.0",
     "netlify-lambda": "^1.6.3",
     "serverless-http": "^2.3.2"
