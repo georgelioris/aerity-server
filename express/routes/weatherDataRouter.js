@@ -40,11 +40,22 @@ router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
 
     console.log('Cached ' + timestamp(req));
   }
-});
+);
+
+function validateParams(req, res, next) {
+  req.params.lat = sanitizeInput(req.params.lat);
+  req.params.lon = sanitizeInput(req.params.lon);
+  const { lat, lon } = req.params;
+  if (isNaN(lat) || isNaN(lon))
+    throw new Error(
+      `Invalid coordinates of type ${typeof lat},${typeof lon}, expected number,number`
+    );
+  next();
+}
 
 // Search for stored data of requested location
 // Update and return the result according to isExpired
-async function getWeatherData(req, res, next) {
+async function getCachedData(req, res, next) {
   const id = getId(`${req.params.lat},${req.params.lon}`);
   let weatherData;
   try {
@@ -53,7 +64,8 @@ async function getWeatherData(req, res, next) {
   } catch (err) {
     return res.json({ message: err.message });
   }
-  res.weatherData = weatherData;
+  if (!isExpired(weatherData)) res.weatherData = weatherData;
+  else res.weatherData = null;
   next();
 }
 module.exports = router;
