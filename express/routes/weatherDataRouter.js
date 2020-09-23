@@ -19,7 +19,6 @@ router.get(
   async (req, res, next) => {
     const { lat, lon } = req.params;
     const { location } = req.query;
-    console.log('---------------', req.query);
     const id = getId(`${req.params.lat},${req.params.lon}`);
     if (!res.weatherData) {
       if (!location) {
