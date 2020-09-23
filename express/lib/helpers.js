@@ -14,5 +14,15 @@ module.exports = {
       result += ('000' + hex).slice(-4);
     }
     return result;
-  }
+  },
+  sanitizeInput: input =>
+    isNaN(input)
+      ? input.replace(/[^a-z0-9áéíóúñü .,_-]/gim, '').trim() || ''
+      : Number(input),
+  formatCache: (id, location, response) => ({
+    locationId: id,
+    loctation: location,
+    data: response,
+    ts: Number(Date.now())
+  })
 };

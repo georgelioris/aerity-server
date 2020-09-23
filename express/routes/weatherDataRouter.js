@@ -1,44 +1,70 @@
 const express = require('express');
 const router = express.Router();
-const { timestamp, isExpired, getId } = require('../lib/helpers');
+const {
+  timestamp,
+  isExpired,
+  getId,
+  sanitizeInput,
+  formatCache
+} = require('../lib/helpers');
 const { openWeatherMap, darkSky } = require('../lib/fetchData');
 const admin = require('firebase-admin');
 const database = admin.database();
 
 // Get weatherData w params
-router.get('/:lat-:lon', getWeatherData, async (req, res, next) => {
-  const { lat, lon } = req.params;
-  const id = getId(`${req.params.lat},${req.params.lon}`);
-  if (!res.weatherData || isExpired(res.weatherData.ts)) {
-    try {
-      const [openRes, darkRes] = await Promise.all([
-        openWeatherMap(lat, lon),
-        darkSky(lat, lon)
-      ]);
-      // Send Response
-      const response = JSON.stringify({
-        ...darkRes.data,
-        timezone: openRes.data.name
-      });
-      res.send(response);
-      // Save Response
-      database.ref(`requests/${id}`).set({
-        locationId: id,
-        loctation: openRes.data.name,
-        clientId: req.query.APPID || null,
-        data: response,
-        ts: Number(Date.now())
-      });
-      // {time} Response sent to {user} {userID}
-      console.log(timestamp(req));
-    } catch (err) {
-      console.error(err);
-      next(err);
-    }
-  } else {
-    res.send(res.weatherData.data);
+router.get(
+  '/:lat,:lon',
+  validateParams,
+  getCachedData,
+  async (req, res, next) => {
+    const { lat, lon } = req.params;
+    const { location } = req.query;
+    console.log('---------------', req.query);
+    const id = getId(`${req.params.lat},${req.params.lon}`);
+    if (!res.weatherData) {
+      if (!location) {
+        try {
+          const [openRes, darkRes] = await Promise.all([
+            openWeatherMap(lat, lon),
+            darkSky(lat, lon)
+          ]);
+          // Send Response
+          const response = JSON.stringify({
+            ...darkRes.data,
+            timezone: openRes.data.name
+          });
+          res.send(response);
+          // Save Response
+          database
+            .ref(`requests/${id}`)
+            .set(formatCache(id, openRes.data.name, response));
+          // {time} Response sent to {user} {userID}
+          console.log(timestamp(req));
+        } catch (err) {
+          console.error(err);
+          next(err);
+        }
+      } else {
+        try {
+          const darkRes = await darkSky(lat, lon);
+          const response = JSON.stringify({
+            ...darkRes.data,
+            timezone: location
+          });
+          res.send(response);
+          database
+            .ref(`requests/${id}`)
+            .set(formatCache(id, location, response));
+        } catch (err) {
+          console.error(err);
+          next(err);
+        }
+      }
+    } else {
+      res.send(res.weatherData.data);
 
-    console.log('Cached ' + timestamp(req));
+      console.log('Cached ' + timestamp(req));
+    }
   }
 );
 

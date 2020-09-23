@@ -19,6 +19,8 @@ app.use(helmet());
 app.use(express.json());
 app.use(cors());
 const weatherDataRouter = require('./routes/weatherDataRouter');
+const locationRouter = require('./routes/locationRouter');
 app.use('/.netlify/functions/server/weather', weatherDataRouter);
+app.use('/.netlify/functions/server/location', locationRouter);
 
 module.exports.handler = serverless(app);
