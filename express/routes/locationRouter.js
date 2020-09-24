@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/:city,:code', validateParams, async (req, res, next) => {
   const { city } = req.params;
-  const code = `,${req.params.code || ''}`;
+  const code = req.parasm.code ? `,${req.params.code}` : '';
   try {
     const openRes = await openWeatherMap(city, code, { useCoords: false });
     const location = openRes.data.name;
