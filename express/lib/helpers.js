@@ -16,7 +16,7 @@ module.exports = {
     return result;
   },
   sanitizeInput: input =>
-    isNaN(input)
+    typeof input === 'string'
       ? input.replace(/[^a-z0-9áéíóúñü .,_-]/gim, '').trim() || ''
       : Number(input),
   formatCache: (id, location, response) => ({

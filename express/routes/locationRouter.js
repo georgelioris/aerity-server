@@ -3,7 +3,7 @@ const { openWeatherMap } = require('../lib/fetchData');
 const { sanitizeInput } = require('../lib/helpers');
 const router = express.Router();
 
-router.get('/:city,:code', validateParams, async (req, res, next) => {
+router.get('/:city/:code?', validateParams, async (req, res, next) => {
   const { city } = req.params;
   const code = req.params.code ? `,${req.params.code}` : '';
   try {
@@ -23,11 +23,11 @@ router.get('/:city,:code', validateParams, async (req, res, next) => {
 
 function validateParams(req, res, next) {
   req.params.city = sanitizeInput(req.params.city);
-  req.params.code = sanitizeInput(req.params.code);
+  req.params.code = sanitizeInput(req.params.code || '');
   const { city, code } = req.params;
   if (typeof city !== 'string' || typeof code !== 'string')
     throw new Error(
-      `Invalid city name of type ${typeof city},${typeof code}, expected string,code`
+      `Invalid city name of type ${typeof city},${typeof code}, expected string,string`
     );
   next();
 }
