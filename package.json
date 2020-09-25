@@ -20,7 +20,8 @@
     "helmet": "^4.1.1",
     "https": "^1.0.0",
     "netlify-lambda": "^2.0.1",
-    "serverless-http": "^2.3.0"
+    "serverless-http": "^2.3.0",
+    "validator": "^13.1.17"
   },
   "devDependencies": {
     "eslint_d": "^9.1.2",

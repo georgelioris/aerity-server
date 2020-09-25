@@ -9,6 +9,7 @@ const {
 } = require('../lib/helpers');
 const { openWeatherMap, darkSky } = require('../lib/fetchData');
 const admin = require('firebase-admin');
+const validator = require('validator');
 const database = admin.database();
 
 // Get weatherData w params
@@ -71,10 +72,8 @@ function validateParams(req, res, next) {
   req.params.lat = sanitizeInput(req.params.lat);
   req.params.lon = sanitizeInput(req.params.lon);
   const { lat, lon } = req.params;
-  if (isNaN(lat) || isNaN(lon))
-    throw new Error(
-      `Invalid coordinates of type ${typeof lat},${typeof lon}, expected number,number`
-    );
+  if (!validator.isLatLong(`${lat},${lon}`))
+    throw new Error('Invalid geographic coordinates');
   next();
 }
 

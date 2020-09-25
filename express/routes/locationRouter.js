@@ -1,6 +1,6 @@
 const express = require('express');
 const { openWeatherMap } = require('../lib/fetchData');
-const { sanitizeInput } = require('../lib/helpers');
+const validator = require('validator');
 const router = express.Router();
 
 router.get('/:city/:code?', validateParams, async (req, res, next) => {
@@ -22,13 +22,14 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
 });
 
 function validateParams(req, res, next) {
+  const sanitizeInput = input =>
+    validator.blacklist(input, '\\[\\]\\`\\+=\\*<>-@#\\$\\%^&()_\\-\\!|{};:');
   req.params.city = sanitizeInput(req.params.city);
   req.params.code = sanitizeInput(req.params.code || '');
   const { city, code } = req.params;
-  if (typeof city !== 'string' || typeof code !== 'string')
-    throw new Error(
-      `Invalid city name of type ${typeof city},${typeof code}, expected string,string`
-    );
+  if (!city || (code !== '' && !validator.isISO31661Alpha2(code))) {
+    throw Error('Invalid city name');
+  }
   next();
 }
 
