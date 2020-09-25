@@ -42,7 +42,7 @@ router.get(
           console.log(timestamp(req));
         } catch (err) {
           console.error(err);
-          next(err);
+          next(err.response.data);
         }
       } else {
         try {
@@ -57,7 +57,7 @@ router.get(
             .set(formatCache(id, location, response));
         } catch (err) {
           console.error(err);
-          next(err);
+          next(err.response.data);
         }
       }
     } else {

@@ -16,8 +16,8 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
       `/.netlify/functions/server/weather/${lat},${lon}?location=${location}`
     );
   } catch (err) {
-    next(err);
     console.error(err);
+    next(err.response.data);
   }
 });
 

@@ -22,5 +22,12 @@ const weatherDataRouter = require('./routes/weatherDataRouter');
 const locationRouter = require('./routes/locationRouter');
 app.use('/.netlify/functions/server/weather', weatherDataRouter);
 app.use('/.netlify/functions/server/location', locationRouter);
+app.use((err, req, res, next) => {
+  if (req.xhr) {
+    res.status(err.cod || 500).send(err.message);
+  } else {
+    next(err);
+  }
+});
 
 module.exports.handler = serverless(app);
