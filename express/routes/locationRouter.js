@@ -23,7 +23,10 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
 
 function validateParams(req, res, next) {
   const sanitizeInput = input =>
-    validator.blacklist(input, '\\[\\]\\`\\+=\\*<>-@#\\$\\%^&()_\\-\\!|{};:');
+    validator.blacklist(
+      input,
+      '\\[\\]\\`\\+=\\*<>-@#\\$\\%^&()_\\-\\!|{};:\'"\\.'
+    );
   req.params.city = sanitizeInput(req.params.city);
   req.params.code = sanitizeInput(req.params.code || '');
   const { city, code } = req.params;
