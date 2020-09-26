@@ -81,15 +81,15 @@ function validateParams(req, res, next) {
 // Update and return the result according to isExpired
 async function getCachedData(req, res, next) {
   const id = getId(`${req.params.lat},${req.params.lon}`);
-  let weatherData;
   try {
     const snapshot = await database.ref(`requests/${id}`).once('value');
-    weatherData = snapshot.val();
+    const weatherData = snapshot.val();
+
+    if (!isExpired(weatherData.ts)) res.weatherData = weatherData;
+    else res.weatherData = null;
   } catch (err) {
     return res.json({ message: err.message });
   }
-  if (!isExpired(weatherData)) res.weatherData = weatherData;
-  else res.weatherData = null;
   next();
 }
 module.exports = router;
