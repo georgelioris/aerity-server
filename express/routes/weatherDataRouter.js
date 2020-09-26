@@ -19,10 +19,10 @@ router.get(
   getCachedData,
   async (req, res, next) => {
     const { lat, lon } = req.params;
-    const { location } = req.query;
+    const { location, timezone } = req.query;
     const id = getId(`${req.params.lat},${req.params.lon}`);
     if (!res.weatherData) {
-      if (!location) {
+      if (!location || !timezone) {
         try {
           const [openRes, darkRes] = await Promise.all([
             openWeatherMap(lat, lon),
@@ -31,7 +31,8 @@ router.get(
           // Send Response
           const response = JSON.stringify({
             ...darkRes.data,
-            timezone: openRes.data.name
+            timezone: openRes.data.timezone,
+            location: openRes.data.name
           });
           res.send(response);
           // Save Response
@@ -49,7 +50,8 @@ router.get(
           const darkRes = await darkSky(lat, lon);
           const response = JSON.stringify({
             ...darkRes.data,
-            timezone: location
+            timezone,
+            location
           });
           res.send(response);
           database

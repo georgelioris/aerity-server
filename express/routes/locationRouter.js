@@ -8,12 +8,13 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
   const code = req.params.code ? `,${req.params.code}` : '';
   try {
     const openRes = await openWeatherMap(city, code, { useCoords: false });
+    const timezone = openRes.data.timezone;
     const location = openRes.data.name;
     const {
       coord: { lat, lon }
     } = openRes.data;
     res.redirect(
-      `/.netlify/functions/server/weather/${lat},${lon}?location=${location}`
+      `/.netlify/functions/server/weather/${lat},${lon}?timezone=${timezone}&location=${location}`
     );
   } catch (err) {
     console.error(err);
