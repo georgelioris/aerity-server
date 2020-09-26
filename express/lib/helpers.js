@@ -4,7 +4,7 @@ module.exports = {
   timestamp: req =>
     `${new Date().toTimeString().replace(/ GMT.*/g, '')} Response send to ${
       req.headers.origin
-    } ${req.query.APPID}`,
+    }`,
   isExpired: miliseconds => (Date.now() - miliseconds > 300000 ? true : false),
   getId: input => {
     var hex, i;
