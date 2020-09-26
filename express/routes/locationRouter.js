@@ -29,9 +29,9 @@ function validateParams(req, res, next) {
     );
   req.params.city = sanitizeInput(req.params.city);
   req.params.code = sanitizeInput(req.params.code || '');
-  const { city, code } = req.params;
-  if (!city || (code !== '' && !validator.isISO31661Alpha2(code))) {
-    throw Error('Invalid city name');
+  const { code } = req.params;
+  if (code !== '' && !validator.isISO31661Alpha2(code)) {
+    throw Error('invalid country code');
   }
   next();
 }
