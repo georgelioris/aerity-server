@@ -19,10 +19,10 @@ module.exports = {
     typeof input === 'string'
       ? input.replace(/[^a-z0-9áéíóúñü .,_-]/gim, '').trim() || ''
       : Number(input),
-  formatCache: (id, location, response) => ({
-    locationId: id,
-    loctation: location,
-    data: response,
-    ts: Number(Date.now())
+  formatCache: (location, data) => ({
+    location: location,
+    data: data,
+    ts: Number(Date.now()),
+    expires: new Date(Date.now() + 300000).toUTCString()
   })
 };

@@ -34,12 +34,14 @@ router.get(
             timezone: openRes.data.timezone,
             location: openRes.data.name
           });
+          res.set({
+            'Cache-Control': 'public, must-revalidate',
+            Expires: new Date(Date.now() + 300000).toUTCString()
+          });
           res.send(response);
           // Save Response
-          database
-            .ref(`requests/${id}`)
-            .set(formatCache(id, openRes.data.name, response));
-          // {time} Response sent to {user} {userID}
+          database.ref(`requests/${id}`).set(formatCache(id, response));
+          // {time} Response sent to {address}
           console.log(timestamp(req));
         } catch (err) {
           console.error(err);
@@ -50,19 +52,25 @@ router.get(
           const darkRes = await darkSky(lat, lon);
           const response = JSON.stringify({
             ...darkRes.data,
-            timezone,
+            timezone: Number(timezone),
             location
           });
+          res.set({
+            'Cache-Control': 'public, must-revalidate',
+            Expires: new Date(Date.now() + 300000).toUTCString()
+          });
           res.send(response);
-          database
-            .ref(`requests/${id}`)
-            .set(formatCache(id, location, response));
+          database.ref(`requests/${id}`).set(formatCache(location, response));
         } catch (err) {
           console.error(err);
           next(err.response.data);
         }
       }
     } else {
+      res.set({
+        'Cache-Control': 'public, must-revalidate',
+        Expires: res.weatherData.expires
+      });
       res.send(res.weatherData.data);
 
       console.log('Cached ' + timestamp(req));
@@ -87,10 +95,11 @@ async function getCachedData(req, res, next) {
     const snapshot = await database.ref(`requests/${id}`).once('value');
     const weatherData = snapshot.val();
 
-    if (!isExpired(weatherData.ts)) res.weatherData = weatherData;
+    if (weatherData && !isExpired(weatherData.ts))
+      res.weatherData = weatherData;
     else res.weatherData = null;
   } catch (err) {
-    return res.json({ message: err.message });
+    next(err);
   }
   next();
 }
