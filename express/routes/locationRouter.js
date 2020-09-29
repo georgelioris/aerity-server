@@ -8,7 +8,7 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
   const code = req.params.code ? `,${req.params.code}` : '';
   try {
     const openRes = await openWeatherMap(city, code, { useCoords: false });
-    const timezone = openRes.data.timezone;
+    const timezone = Number(openRes.data.timezone);
     const location = openRes.data.name;
     const {
       coord: { lat, lon }
@@ -18,7 +18,7 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
     );
   } catch (err) {
     console.error(err);
-    next(err.response.data);
+    next(err);
   }
 });
 
@@ -30,10 +30,6 @@ function validateParams(req, res, next) {
     );
   req.params.city = sanitizeInput(req.params.city);
   req.params.code = sanitizeInput(req.params.code || '');
-  const { code } = req.params;
-  if (code !== '' && !validator.isISO31661Alpha2(code)) {
-    throw Error('invalid country code');
-  }
   next();
 }
 
