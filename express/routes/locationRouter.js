@@ -18,7 +18,7 @@ router.get('/:city/:code?', validateParams, async (req, res, next) => {
     );
   } catch (err) {
     console.error(err);
-    next(err);
+    next(err.response.data);
   }
 });
 
