@@ -21,7 +21,7 @@
     "https": "^1.0.0",
     "netlify-lambda": "^2.0.3",
     "serverless-http": "^2.7.0",
-    "validator": "^13.5.2"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "eslint_d": "^10.0.4",
